@@ -267,19 +267,21 @@
     </div>
 
     <script>
+        <script>
     // --------------------------------------------
-    // Google Sheets Submission (REPLACE URL BELOW)
+
     // --------------------------------------------
-    const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbxprW-f48iR0BNJCBVwujab5Mt0bIyAQ-ca12yd-N-VYUq_FnizFI1h_fa-HpMUp1vp/exec";
+    const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbzfyIay5r3YSyWe9RulcxwGQ4qhEfcglHKnQhVKI0w_KJaGGpKNV4RZkyB6eSk-7_9w/exec";
 
     // Store registrations locally too (optional)
     let registrations = JSON.parse(localStorage.getItem('sakuraRegistrations')) || [];
 
     // Form submission
-    document.getElementById('registrationForm').addEventListener('submit', function(e) {
+    const form = document.getElementById('registrationForm');
+    form.addEventListener('submit', function(e) {
         e.preventDefault();
-        
-        const formData = {
+
+        const formData = new URLSearchParams({
             studentName: document.getElementById('studentName').value,
             studentPhone: document.getElementById('studentPhone').value,
             studentEmail: document.getElementById('studentEmail').value,
@@ -289,33 +291,31 @@
             previousExperience: document.getElementById('previousExperience').value,
             preferredSchedule: document.getElementById('preferredSchedule').value,
             date: new Date().toLocaleString('ar-EG')
-        };
+        });
 
-        // Save locally (optional for admin panel)
-        registrations.push(formData);
+        // Save locally for admin panel
+        const localData = Object.fromEntries(formData.entries());
+        registrations.push(localData);
         localStorage.setItem('sakuraRegistrations', JSON.stringify(registrations));
 
-        // -------- Send to Google Sheets --------
+        // Send to Google Sheets
         fetch(GOOGLE_SHEETS_URL, {
-            method: "POST",
-            mode: "cors",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(formData)
+            method: 'POST',
+            body: formData
         })
         .then(res => res.json())
         .then(data => {
-            console.log("Google Sheets:", data);
+            console.log('Google Sheets:', data);
         })
         .catch(err => {
-            console.error("Google Sheets Error:", err);
+            console.error('Google Sheets Error:', err);
         });
-        // ----------------------------------------
 
         // Show success modal
         document.getElementById('successModal').style.display = 'flex';
 
         // Reset form
-        this.reset();
+        form.reset();
     });
 
     // Admin login link
@@ -404,6 +404,8 @@
     // Hide admin items initially
     document.getElementById('adminLogin').style.display = 'none';
     document.getElementById('adminPanel').style.display = 'none';
-    </script>
+</script>
+
 </body>
+
 </html>
